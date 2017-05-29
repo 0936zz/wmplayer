@@ -1,0 +1,38 @@
+{
+  "extends": "eslint:recommended",
+  "env": {
+	"es6": true,
+	"browser": true
+  },
+  "globals": {
+	"WMPlayer": false,
+	"jQuery": false,
+	"$": true
+  },
+  "rules": {
+	// enable additional rules
+	"no-unused-vars": "off",
+	"indent": [
+	  "error",
+	  "tab"
+	],
+	"linebreak-style": [
+	  "error",
+	  "windows"
+	],
+	"quotes": [
+	  "error",
+	  "single"
+	],
+	"semi": [
+	  "error",
+	  "always"
+	],
+	"no-cond-assign": [
+	  "error",
+	  "always"
+	],
+	// disable rules from base configurations
+	"no-console": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "source": {
+	"include": [
+	  "src/js/wmplayer.js"
+	]
+  },
+  "opts": {
+	"encoding": "utf8",
+	"destination": "./doc/"
+  },
+  "template": {
+	"monospaceLinks": true
+  }
+}

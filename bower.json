@@ -1,0 +1,21 @@
+{
+  "name": "wmplayer",
+  "description": "",
+  "main": "src/js/wmplayer.js",
+  "authors": [
+    "0936zz"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "music",
+    "player"
+  ],
+  "homepage": "",
+  "ignore": [
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "jQuery": "^3.2.1"
+  }
+}
