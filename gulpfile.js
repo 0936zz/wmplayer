@@ -27,11 +27,11 @@ gulp.task('watch', ['js', 'less', 'sprite'], () => {
 	gulp.watch('src/js/*.js', ['js']);
 	gulp.watch('src/less/*.less', ['less']);
 	gulp.watch('src/img/*.png', ['sprite']);
-	gulp.watch('demo/**', ['liveload']);
+	gulp.watch('demo/index.html', ['liveload']);
 });
 
 gulp.task('liveload', () => {
-	gulp.src('demo/**')
+	gulp.src('demo/index.html')
 		.pipe(connect.reload());
 });
 
@@ -44,11 +44,13 @@ gulp.task('js', ['lint'], () => {
 			'main.js',
 		]))
 		.pipe(concat('app.js'))
-		.pipe(babel({
-			presets: ['es2015'],
-		}))
-		.pipe(uglify())
-		.pipe(gulp.dest('demo/static/js'));
+		// 如果浏览器不支持es6可以将下面的代码取消注释
+		// .pipe(babel({
+		// 	presets: ['es2015'],
+		// }))
+		// .pipe(uglify())
+		.pipe(gulp.dest('demo/static/js'))
+		.pipe(connect.reload());
 });
 
 gulp.task('lint', () => {
@@ -66,8 +68,8 @@ gulp.task('less', () => {
 		.pipe(autoPrefixer({
 			browsers: ['chrome >= 20', 'ie > 8', 'firefox >= 20', 'android >= 2.3']
 		}))
-		.pipe(cleanCss())
-		.pipe(gulp.dest('demo/static/css'));
+		.pipe(gulp.dest('demo/static/css'))
+		.pipe(connect.reload());
 });
 
 gulp.task('default', ['watch', 'connect'], () => {
@@ -82,9 +84,11 @@ gulp.task('sprite', () => {
 			imgPath: '../img/sprite.png'
 		}));
 	spriteData.css
-		.pipe(gulp.dest('src/less/'));
+		.pipe(gulp.dest('src/less/'))
+		.pipe(connect.reload());
 	spriteData.img
-		.pipe(gulp.dest('demo/static/img/'));
+		.pipe(gulp.dest('demo/static/img/'))
+		.pipe(connect.reload());
 });
 
 gulp.task('build', () => {

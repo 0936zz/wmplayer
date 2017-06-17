@@ -11,24 +11,24 @@
 <body>
 <div class="wm">
 	<div class="wm-cover-box">
-		<img src="static/img/cover.jpg" alt="cover" class="wm-cover">
-		<button class="wm-play"></button>
+		<img src="static/img/cover.jpg" alt="cover" class="wm-cover" data-wm-cover>
+		<button class="wm-play" data-wm-play-btn></button>
 	</div>
 	<div class="wm-info">
-		<p class="wm-song">江湖</p>
-		<p class="wm-singer">许嵩</p>
+		<p class="wm-song" data-wm-song>江湖</p>
+		<p class="wm-singer" data-wm-singer>许嵩</p>
 	</div>
 	<div class="wm-pro">
-		<div class="wm-pro-played"></div>
+		<div class="wm-pro-played" data-wm-pro></div>
 	</div>
-	<button class="wm-next"></button>
+	<button class="wm-next" data-wm-next></button>
 	<button class="wm-list-toggle"></button>
 	<div class="wm-toggle">
 		<div class="wm-toggle-arrow"></div>
 	</div>
-	<div class="wm-list">
+	<div class="wm-list-box">
 		<div class="wm-list-current">播放列表</div>
-		<ul class="wm-list-title wm-scroll">
+		<ul class="wm-list-title wm-scroll" data-wm-list-title>
 			<li>播放列表</li>
 			<li>测试1</li>
 			<li>测试2</li>
@@ -38,65 +38,65 @@
 			<li>测试6</li>
 			<li>测试测试7</li>
 		</ul>
-		<ul class="wm-list-box wm-scroll">
+		<ul class="wm-list wm-scroll" data-wm-list>
 			<li class="wm-list-playing">
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn id="a"></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 			<li>
 				<img src="static/img/cover.jpg" alt="cover" class="wm-list-cover">
 				<p class="wm-list-song">江湖</p>
 				<p class="wm-list-singer">许嵩</p>
-				<button class="wm-list-play"></button>
+				<button class="wm-list-play" data-wm-list-play-btn></button>
 			</li>
 		</ul>
 		<div class="wm-function">
-			<button class="wm-prev"></button>
-			<button class="wm-volume"></button>
+			<button class="wm-prev" data-wm-prev></button>
+			<button class="wm-volume" data-wm-mute></button>
 			<button class="wm-mode"></button>
 			<button class="wm-lrc-toggle"></button>
 		</div>
 	</div>
 </div>
-<ul class="wm-float">
+<ul class="wm-float" data-wm-lrc>
 	<li class="wm-lrc-current">今夕是何夕</li>
 	<li>晚风过花庭</li>
 	<li>飘零</li>
