@@ -55,6 +55,7 @@ gulp.task('js', ['lint'], () => {
 
 gulp.task('lint', () => {
 	gulp.src('src/js/*.js')
+		.pipe(plumber())
 		.pipe(eslint({
 			configFile: '.eslintrc'
 		}))

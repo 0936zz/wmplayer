@@ -1,7 +1,7 @@
 # WMPlayer
 
 这是V3版本开发的最新进展，距离开发完毕还剩3650天，请耐心等待
-V2版本参见[Git@OSC](https://git.oschina.net/0936zz/wmplayer)
+V2版本参见[Git@OSC](https://git.oschina.net/0936zz/WMPlayer)
 
 
 如何开发

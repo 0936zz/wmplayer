@@ -45,6 +45,8 @@ let player = new WMPlayer({
 	bindEventOnListRootElement: false
 });
 
+
+console.log(player);
 // 添加效果
 
 $(function () {
