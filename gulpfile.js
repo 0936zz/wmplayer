@@ -48,7 +48,6 @@ gulp.task('js', ['lint'], () => {
 		// .pipe(babel({
 		// 	presets: ['es2015'],
 		// }))
-		// .pipe(uglify())
 		.pipe(gulp.dest('demo/static/js'))
 		.pipe(connect.reload());
 });
@@ -93,5 +92,38 @@ gulp.task('sprite', () => {
 });
 
 gulp.task('build', () => {
+	gulp.src('src/js/wmplayer.js')
+		.pipe(eslint({
+			configFile: '.eslintrc'
+		}))
+		.pipe(eslint.failOnError())
+		.pipe(babel({
+			presets: ['es2015']
+		}))
+		.pipe(gulp.dest('dist/js/'))
+		.pipe(uglify())
+		.pipe(rename('wmplayer.min.js'))
+		.pipe(gulp.dest('dist/js/'));
 
+
+	let spriteData = gulp.src('src/img/*.png')
+		.pipe(spritesmith({
+			imgName: 'sprite.png',
+			cssName: 'sprite.less',
+			imgPath: '../img/sprite.png'
+		}));
+	spriteData.css
+		.pipe(gulp.dest('src/less/'));
+	spriteData.img
+		.pipe(gulp.dest('dist/img/'));
+
+	gulp.src('src/less/wmplayer.less')
+		.pipe(less())
+		.pipe(autoPrefixer({
+			browsers: ['chrome >= 20', 'ie > 8', 'firefox >= 20', 'android >= 2.3']
+		}))
+		.pipe(gulp.dest('dist/css/'))
+		.pipe(cleanCss({compatibility: 'ie8'}))
+		.pipe(rename('wmplayer.min.css'))
+		.pipe(gulp.dest('dist/css/'));
 });

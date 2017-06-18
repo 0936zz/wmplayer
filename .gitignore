@@ -4,3 +4,4 @@ bower_components/
 doc/
 npm-debug.log
 demo/static
+dist/

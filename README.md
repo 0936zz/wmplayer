@@ -13,6 +13,11 @@ npm install
 bower install
 npm run dev
 ```
+如何构建源码
+```bash
+npm install
+npm run build
+```
 
 如何构建文档
 ```bash
