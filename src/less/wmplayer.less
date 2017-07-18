@@ -12,6 +12,22 @@
 	width: 280px;
 	height: 76px;
 	background-color: @wm-color-bg;
+	transition: left .3s;
+	&.wm-hide {
+		left: -280px + 72px;
+		.wm-toggle-arrow {
+			transform: rotate(0);
+		}
+		.wm-cover-box {
+			left: 280px - 72px - 4px;
+			height: 72px + 4px;
+			width: 72px + 4px;
+		}
+		.wm-play {
+			top: (76px - @play-height) / 2;
+			left: (76px - @play-height) / 2;
+		}
+	}
 	* {
 		margin: 0;
 		padding: 0;
@@ -40,12 +56,23 @@
 			border-radius: 3px;
 		}
 	}
-	.wm-cover {
+	.wm-cover-box {
 		width: 72px;
 		height: 72px;
 		position: absolute;
 		top: 0;
 		left: 0;
+		transition: all .3s;
+		z-index: 2;
+		font-size: 0;
+	}
+	.wm-cover {
+		width: 100%;
+		height: 100%;
+	}
+	.wm-cover-box:hover .wm-play {
+		opacity: 1;
+		transition: opacity .3s;
 	}
 	.wm-info {
 		position: absolute;
@@ -84,14 +111,14 @@
 	.wm-play {
 		.sprite(@play);
 		position: absolute;
-		top: (76px - @play-height)/2;
-		left: (76px - @play-height)/2;
+		top: (72px - @play-height) / 2;
+		left: (72px - @play-height) / 2;
+		transition: all .3s;
+	}
+	.wm-playing {
+		.sprite(@pause);
 		opacity: 0;
 		transition: opacity .3s 1s;
-	}
-	.wm-cover-box:hover .wm-play {
-		opacity: 1;
-		transition: opacity .3s;
 	}
 	.wm-next {
 		.sprite(@next);
@@ -116,7 +143,9 @@
 	}
 	.wm-toggle-arrow {
 		.sprite(@right);
-		margin-top: (72px - @right-height)/2;
+		margin-top: (76px - @right-height)/2;
+		transform: rotate(180deg);
+		transition: transform .3s;
 	}
 	.wm-list-box {
 		position: absolute;
@@ -124,6 +153,11 @@
 		height: 320px;
 		width: 100%;
 		background-color: @wm-color-bg;
+		overflow: hidden;
+		transition: height .3s;
+		&.wm-list-hide {
+			height: 0;
+		}
 	}
 	.wm-list-current {
 		position: absolute;
@@ -140,7 +174,7 @@
 	.wm-list-title {
 		position: absolute;
 		top: 32px;
-		height: 0;
+		height: 320px - 32px - 36px;
 		width: 100%;
 		text-indent: 8px;
 		line-height: 32px;
@@ -150,15 +184,13 @@
 		overflow: auto;
 		z-index: 1;
 		transition: height .3s;
+		display: none;
 		li {
 			cursor: pointer;
 			&:hover {
 				background: fadeout(@wm-color-grey, 30%);
 			}
 		}
-	}
-	.wm-list-title-show {
-		height: 320px - 32px - 36px;
 	}
 	.wm-function {
 		position: absolute;
