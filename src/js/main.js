@@ -43,7 +43,7 @@ let player = new WMPlayer({
 	basicIsFirst: true,
 	listFormat: '<li class="wm-list-playing">' +
 	'<img src="${img}$" alt="cover" class="wm-list-cover"> ' +
-	'<p class="wm-list-song">${song}$</p> ' +
+	'<p class="wm-list-song">${name}$</p> ' +
 	'<p class="wm-list-singer">${singer}$</p> ' +
 	'<button class="wm-list-play" data-wm-list-play-btn></button> ' +
 	'</li>',

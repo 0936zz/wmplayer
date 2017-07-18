@@ -31,7 +31,7 @@ const WMPlayer = (function ($) {
 				tplRightDelimiter: '}$'
 			};
 			this.config = $.extend({}, defaultConfig, config);
-			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list-title'];
+			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list', 'list-title'];
 			this.dom = {
 				container: $(this.config.containerSelector),
 			};
@@ -50,6 +50,7 @@ const WMPlayer = (function ($) {
 			this.callbacks = {};
 			this._formatList();
 			this._bindEvents();
+			this.changeList(this.config.playList);
 			this._setInfo(this.config.playList, this.config.playSong);
 			callback && callback();
 			if (this.config.autoPlay) {
@@ -296,23 +297,23 @@ const WMPlayer = (function ($) {
 		changeList (list) {
 			this._trigger('changeList', [list]);
 			// 设置列表活动类
-			// this.dom.listTitle.find(`.${this.config.currentListClass}`).removeClass(this.config.currentListClass);
-			// this.dom.listTitle.find(`[data-wm-list-title-${list}]`).addClass(this.config.currentListClass);
+			this.dom.listTitle.find(`.${this.config.currentListClass}`).removeClass(this.config.currentListClass);
+			this.dom.listTitle.find(`[data-wm-list-title-${list}]`).addClass(this.config.currentListClass);
 			// 切换audio标签的显示列表
 			this._data('displayList', list);
 			// 清除播放列表
 			this.dom.list.empty();
 			// // 获取列表模板
 			let format = this.config.listFormat;
-			// // 匹配正则
+			// 匹配正则
+			let content = '';
 			for (let i = 0; i < this.list[list].length; i++) {
-				let content = format;
-				content.replace(this.regex.tpl, function () {
-					console.log(arguments);
+				content += format.replace(this.regex.tpl, (value, name) => {
+					return this.list[list][i][name] || this.config.defaultText;
 				});
-				// 输出列表
-				this.dom.list.append(content);
 			}
+			// 输出列表
+			this.dom.list.append(content);
 			// // 为列表当前播放歌曲添加样式
 			// if (list === this.getCurrentList()) {
 			// 	this._setCurrent(this.getCurrentSong());
