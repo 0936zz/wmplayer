@@ -15,44 +15,60 @@ const WMPlayer = (function ($) {
 		 * @param {String}  [config.defaultText]    模板中未定义时的默认文字
 		 * @param {String}  [config.currentListClass]   当前播放列表的class
 		 * @param {String}  [config.currentSongClass]   当前播放歌曲的class
+		 * @param {String}  [config.currentLrcClass]    当前播放歌词的class
 		 * @param {Boolean} [config.autoPlay=true]
 		 * @param {bindEvent} [callback]
 		 */
 		constructor (config, callback) {
+			// 默认配置
 			let defaultConfig = {
 				autoPlay: false,
 				basicIsFirst: false,
-				defaultText: '',
+				defaultText: '-',
 				playList: 0,
 				playSong: 0,
-				currentListClass: '',
-				currentSongClass: '',
 				tplLeftDelimiter: '${',
 				tplRightDelimiter: '}$'
 			};
+			// 合并配置项
 			this.config = $.extend({}, defaultConfig, config);
+			// 需要获取的dom数组，play-btn会获取data-wm-play-btn
 			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list', 'list-title'];
 			this.dom = {
 				container: $(this.config.containerSelector),
 			};
 			for (let i = 0; i < attrArray.length; i++) {
-				let domName = attrArray[i].replace(/-(\w)/g, function ($0, $1) {
+				// 横杆转驼峰
+				let domName = attrArray[i].replace(/-(\w)/g, ($0, $1) => {
 					return $1.toUpperCase();
 				});
+				// 获取dom
 				this.dom[domName] = this.dom.container.find(`[data-wm-${attrArray[i]}]`);
 			}
+			// 初始化audio标签
 			this.audio = $('<audio></audio>');
+			// 初始化数据存储对象
 			this.data = {};
+			// 匹配歌词和模板的正则表达式
 			this.regex = {
 				lrc: new RegExp('\\[(\\d{2})(&#58;|:)(\\d{2})(&#46;|\\.)(\\d{2})\\]([^\\[]+)', 'g'),
 				tpl: new RegExp(this._formatDelimiter(this.config.tplLeftDelimiter) + '(\\w+)' + this._formatDelimiter(this.config.tplRightDelimiter), 'g')
 			};
+			// 回调函数对象
 			this.callbacks = {};
+			// 格式化列表
 			this._formatList();
+			// 输出列表名称
+			this._outputList();
+			// 绑定事件
 			this._bindEvents();
+			// 输出当前播放列表的歌曲
 			this.changeList(this.config.playList);
+			// 显示歌曲信息
 			this._setInfo(this.config.playList, this.config.playSong);
+			// 绑定事件的回调
 			callback && callback();
+			// 自动播放
 			if (this.config.autoPlay) {
 				this.play();
 			}
@@ -63,10 +79,12 @@ const WMPlayer = (function ($) {
 		 * @private
 		 */
 		_bindEvents () {
+			// 播放暂停按钮
 			this.dom.playBtn.on('click', () => {
 				this.togglePlay();
 			});
 			this.audio.on('play pause', () => {
+				// 播放或暂停时修改播放按钮的状态
 				let funName = this.isPlaying() ? 'addClass' : 'removeClass';
 				this.dom.playBtn[funName]('wm-playing');
 			}).on('timeupdate', () => {
@@ -74,8 +92,40 @@ const WMPlayer = (function ($) {
 
 				this._trigger('timeUpdate');
 			});
+			// 下一首
 			this.dom.next.on('click', () => {
 				this.next();
+			});
+			// 封面加载错误
+			this.dom.cover.on('error', () => {
+				let img = this.dom.cover.attr('src');
+				let defaultImg = this.config.defaultImg;
+				// 放置默认图片出错
+				if (img !== defaultImg) {
+					this.dom.cover.attr('src', defaultImg);
+				}
+				// TODO canvas提示图片加载出错
+			});
+			// 切换列表
+			this.dom.listTitle.on('click', 'li', (event) => {
+				let e = $(event.target);
+				let index = parseInt(e.data('wm-list-title-index'));
+				this._data('displayList', index);
+				this.changeList(index);
+				// TODO 更换列表callback
+			});
+			// 切换歌曲
+			this.dom.list.on('click', '[data-wm-list-play-btn]', (event) => {
+				let e = event.target;
+				// 可能会有一个页面有多个列表存在，故使用查找父元素的方法寻找列表
+				let list = $(e).parents('[data-wm-list]');
+				let btnList = list.find('[data-wm-list-play-btn]');
+				// 由于jQuery对象是个伪数组，没有indexOf方法，因此只能遍历（划掉）
+				// $.fn.toArray可以把jQuery对象转换为数组
+				let index = btnList.toArray().indexOf(e);
+				if (index !== -1) {
+					this.play(this._data('displayList'), index);
+				}
 			});
 
 		}
@@ -87,8 +137,9 @@ const WMPlayer = (function ($) {
 		 * @private
 		 */
 		_formatDelimiter (str) {
+			// 将( ) [ ] { } ^ $ 加上转义符
 			let reg = new RegExp('(\\{|\\}|\\[|\\]|\\(|\\)|\\^|\\$)', 'g');
-			return str.replace(reg, function (value) {
+			return str.replace(reg, (value) => {
 				return '\\' + value;
 			});
 		}
@@ -102,6 +153,11 @@ const WMPlayer = (function ($) {
 			this.list = [];
 			let basicIsFirst = this.config.basicIsFirst;
 
+			/**
+			 * 寻找公用数据
+			 * @param list
+			 * @return {number}
+			 */
 			function getBasic (list) {
 				for (let j = 0; j < list.length; j++) {
 					if (list[j].basic) {
@@ -112,14 +168,28 @@ const WMPlayer = (function ($) {
 			}
 
 			for (let i = 0; i < list.length; i++) {
+				// 添加列表公用数据
 				this.list[i] = [];
 				let basicIndex = basicIsFirst ? 0 : getBasic(list[i]);
 				this.list[i].name = list[i][basicIndex].name || this.config.defaultText;
 				this.list[i].singer = list[i][basicIndex].singer || this.config.defaultText;
-				this.list[i].image = list[i][basicIndex].img || this.config.defaultImg;
+				this.list[i].img = list[i][basicIndex].img || this.config.defaultImg;
 				list[i].splice(basicIndex, 1);
+				// 添加歌曲
 				this.addSong(list[i], i);
 			}
+		}
+
+		/**
+		 * 输出播放列表标题
+		 * @private
+		 */
+		_outputList () {
+			let html = '';
+			for (let i = 0; i < this.list.length; i++) {
+				html += `<li data-wm-list-title-index="${i}">${this.list[i].name}<li>`;
+			}
+			this.dom.listTitle.html(html);
 		}
 
 		/**
@@ -152,6 +222,16 @@ const WMPlayer = (function ($) {
 		}
 
 		/**
+		 * 给当前播放的歌曲添加class
+		 * @param index
+		 * @private
+		 * @todo
+		 */
+		_setCurrent (index) {
+
+		}
+
+		/**
 		 * 设置歌词（包含ajax）
 		 * @param {number} list
 		 * @param {number} song
@@ -161,6 +241,9 @@ const WMPlayer = (function ($) {
 			let info = this.getInfo(list, song);
 			let ajax = info.ajax;
 			let lrc = info.lrc;
+			if (ajax) {
+				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}"></li>`);
+			}
 		}
 
 		/**
@@ -315,9 +398,9 @@ const WMPlayer = (function ($) {
 			// 输出列表
 			this.dom.list.append(content);
 			// // 为列表当前播放歌曲添加样式
-			// if (list === this.getCurrentList()) {
-			// 	this._setCurrent(this.getCurrentSong());
-			// }
+			if (list === this.getCurrentList()) {
+				this._setCurrent(this.getCurrentSong());
+			}
 		}
 
 		/**
