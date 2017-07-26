@@ -3,6 +3,9 @@
 这是V3版本开发的最新进展，距离开发完毕还剩3650天，请耐心等待
 V2版本参见[Git@OSC](https://git.oschina.net/0936zz/WMPlayer)
 
+## TODO
+- [ ] 快捷键绑定
+- [ ] 缓冲进度条
 
 如何开发
 ```bash

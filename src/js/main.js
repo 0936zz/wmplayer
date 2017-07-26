@@ -1,5 +1,5 @@
 let player = new WMPlayer({
-	containerSelector: '.wm',
+	containerSelector: '.wm,.wm-lrc',
 	/*eslint no-undef: 0*/
 	songList: wm_list,
 	basicIsFirst: true,
@@ -9,10 +9,12 @@ let player = new WMPlayer({
 	'<p class="wm-list-singer">${singer}$</p> ' +
 	'<button class="wm-list-play" data-wm-list-play-btn></button> ' +
 	'</li>',
-	currentListClass:'wm-list-title-current',
-	currentSongClass:'wm-list-playing',
+	currentListClass: 'wm-list-title-current',
+	currentSongClass: 'wm-list-playing',
+	currentLrcClass: '',
 	tplLeftDelimiter: '${',
 	tplRightDelimiter: '}$',
+	progressCSSPrototype:'width',
 	autoPlay: false
 });
 

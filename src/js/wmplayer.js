@@ -5,6 +5,14 @@ const WMPlayer = (function ($) {
 		 * @this WMPlayer
 		 * @return {Boolean} 返回false取消播放
 		 */
+
+		/**
+		 * @callback progress
+		 * @this WMPlayer
+		 * @param {jQuery} progress 进度条元素
+		 * @param {number} percent  进度百分比
+		 */
+
 		/**
 		 * 构造函数
 		 * @param {Object}  config
@@ -16,6 +24,7 @@ const WMPlayer = (function ($) {
 		 * @param {String}  [config.currentListClass]   当前播放列表的class
 		 * @param {String}  [config.currentSongClass]   当前播放歌曲的class
 		 * @param {String}  [config.currentLrcClass]    当前播放歌词的class
+		 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，当绑定progress处理函数后此配置不再起作用
 		 * @param {Boolean} [config.autoPlay=true]
 		 * @param {bindEvent} [callback]
 		 */
@@ -28,12 +37,28 @@ const WMPlayer = (function ($) {
 				playList: 0,
 				playSong: 0,
 				tplLeftDelimiter: '${',
-				tplRightDelimiter: '}$'
+				tplRightDelimiter: '}$',
+				progressCSSPrototype: 'width'
 			};
+
+			/**
+			 * 格式化模板定界符
+			 * @param str
+			 * @return {string}
+			 * @private
+			 */
+			function formatDelimiter (str) {
+				// 将( ) [ ] { } ^ $ 加上转义符
+				let reg = new RegExp('(\\{|\\}|\\[|\\]|\\(|\\)|\\^|\\$)', 'g');
+				return str.replace(reg, (value) => {
+					return '\\' + value;
+				});
+			}
+
 			// 合并配置项
 			this.config = $.extend({}, defaultConfig, config);
 			// 需要获取的dom数组，play-btn会获取data-wm-play-btn
-			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list', 'list-title'];
+			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list', 'list-title', 'lrc', 'progress'];
 			this.dom = {
 				container: $(this.config.containerSelector),
 			};
@@ -52,14 +77,15 @@ const WMPlayer = (function ($) {
 			// 匹配歌词和模板的正则表达式
 			this.regex = {
 				lrc: new RegExp('\\[(\\d{2})(&#58;|:)(\\d{2})(&#46;|\\.)(\\d{2})\\]([^\\[]+)', 'g'),
-				tpl: new RegExp(this._formatDelimiter(this.config.tplLeftDelimiter) + '(\\w+)' + this._formatDelimiter(this.config.tplRightDelimiter), 'g')
+				tpl: new RegExp(formatDelimiter(this.config.tplLeftDelimiter) + '(\\w+)' + formatDelimiter(this.config.tplRightDelimiter), 'g')
 			};
-			// 回调函数对象
+			// 回调函数和处理函数对象
 			this.callbacks = {};
+			this.handles = {};
 			// 格式化列表
 			this._formatList();
 			// 输出列表名称
-			this._outputList();
+			this._setList();
 			// 绑定事件
 			this._bindEvents();
 			// 输出当前播放列表的歌曲
@@ -88,8 +114,9 @@ const WMPlayer = (function ($) {
 				let funName = this.isPlaying() ? 'addClass' : 'removeClass';
 				this.dom.playBtn[funName]('wm-playing');
 			}).on('timeupdate', () => {
-				// var percent =
-
+				// 更新进度条
+				this._updateProgress();
+				this.updateLrc();
 				this._trigger('timeUpdate');
 			});
 			// 下一首
@@ -128,20 +155,6 @@ const WMPlayer = (function ($) {
 				}
 			});
 
-		}
-
-		/**
-		 * 格式化模板定界符
-		 * @param str
-		 * @return {string}
-		 * @private
-		 */
-		_formatDelimiter (str) {
-			// 将( ) [ ] { } ^ $ 加上转义符
-			let reg = new RegExp('(\\{|\\}|\\[|\\]|\\(|\\)|\\^|\\$)', 'g');
-			return str.replace(reg, (value) => {
-				return '\\' + value;
-			});
 		}
 
 		/**
@@ -184,7 +197,7 @@ const WMPlayer = (function ($) {
 		 * 输出播放列表标题
 		 * @private
 		 */
-		_outputList () {
+		_setList () {
 			let html = '';
 			for (let i = 0; i < this.list.length; i++) {
 				html += `<li data-wm-list-title-index="${i}">${this.list[i].name}<li>`;
@@ -209,7 +222,7 @@ const WMPlayer = (function ($) {
 			// 输出歌名和歌手
 			this.dom.name.html(songInfo.name);
 			this.dom.singer.html(songInfo.singer);
-			// 更换封面
+			// 包含ajax更换封面
 			this.dom.cover.attr('src', songInfo.img);
 			// 更换歌词
 			this._setLrc(list, song);
@@ -217,7 +230,7 @@ const WMPlayer = (function ($) {
 			this.dom.progress.width(0);
 			// 列表添加样式
 			if (list === this.getDisplayList()) {
-				// this._setCurrent(song);
+				this._setCurrent(song);
 			}
 		}
 
@@ -225,9 +238,19 @@ const WMPlayer = (function ($) {
 		 * 给当前播放的歌曲添加class
 		 * @param index
 		 * @private
-		 * @todo
+		 * @todo 未写
 		 */
 		_setCurrent (index) {
+
+		}
+
+		_updateProgress () {
+			let percent = this.getPercent();
+			if (this.handles.progress) {
+				this.handles.progress.call(this, this.dom.progress, percent);
+			} else {
+				this.dom.progress.css(this.config.progressCSSPrototype, percent + '%');
+			}
 
 		}
 
@@ -241,8 +264,29 @@ const WMPlayer = (function ($) {
 			let info = this.getInfo(list, song);
 			let ajax = info.ajax;
 			let lrc = info.lrc;
+			let outputLrc = (lrc) => {
+				let html = '';
+				let timeArr = [];
+				$.each(lrc, (key, value) => {
+					html += `<li data-wm-lrc-${key}>${value}</li>`;
+					timeArr.push(key);
+				});
+				this._data('timeArr', timeArr);
+				this.dom.lrc.html(html);
+				this.updateLrc();
+			};
 			if (ajax) {
-				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}"></li>`);
+				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">正在加载歌词...</li>`);
+				$.get(lrc).done((data) => {
+					this.list[list][song].lrc = this._parseLrc(data);
+					if (list === this.getCurrentList() && song === this.getCurrentSong()) {
+						outputLrc(info.lrc);
+					}
+				}).fail(() => {
+					this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">歌词加载失败</li>`);
+				});
+			} else {
+				outputLrc(lrc);
 			}
 		}
 
@@ -437,6 +481,18 @@ const WMPlayer = (function ($) {
 			}
 		}
 
+		getCurrentTime () {
+			return Math.round(this.audio.prop('currentTime') * 1000);
+		}
+
+		getDuration () {
+			return Math.round(this.audio.prop('duration') * 1000);
+		}
+
+		getPercent () {
+			return this.getCurrentTime() / this.getDuration() * 100;
+		}
+
 		/**
 		 * 获取指定的歌曲信息
 		 * @param {number} [list=当前播放列表]  列表序号
@@ -505,7 +561,57 @@ const WMPlayer = (function ($) {
 		}
 
 		/**
+		 * 通过传入的时间返回指定时间的歌词
+		 * @param {number} [time=当前时间]  不传代表当前时间，单位毫秒
+		 * @param {boolean} [info=true]    true返回歌词字符串，false返回歌词开始时间（单位：毫秒）
+		 */
+		getLrc (time = this.getCurrentTime(), info = true) {
+			let lrcList = this.getCurrentSong(true).lrc;
+			let lrc, lastIndex = 0;
+			$.each(lrcList, function (index) {
+				if (time < index) {
+					return false;
+				}
+				lastIndex = index;
+			});
+			lrc = lastIndex;
+			return info ? this.getCurrentSong(true).lrc[lrc] : lrc;
+		}
 
+		/**
+		 * 更新歌词显示
+		 */
+		updateLrc () {
+			let dataLrc = this._data('currentLrc');
+			let currentLrc = this.getLrc(this.getCurrentTime(), false);
+			// 判断是否需要切换歌词
+			if (dataLrc !== currentLrc) {
+				// 设置当前歌词
+				this._data('currentLrc', currentLrc);
+				// 删除以前添加的class
+				let currentClass = this.config.currentLrcClass;
+				this.dom.lrc.find(currentClass).removeClass(currentClass);
+				this.dom.lrc.each(function (index, ele) {
+					ele = $(ele);
+					let lrc = ele.find(`[data-wm-lrc-${currentLrc}]`);
+					// 添加class
+					lrc.addClass(currentClass);
+					// 计算滚动的高度
+					let position = lrc.position();
+					let positionTop = position ? position.top : 0;
+					let top = ele.scrollTop();
+					let lrcTop = parseInt(ele.data('wm-top') || 0);
+					let time = parseInt(ele.data('wm-time') || 0);
+					// 动画滚动
+					ele.animate({
+						scrollTop: top + positionTop - lrcTop
+					}, time);
+				});
+
+			}
+		}
+
+		/**
 		 * 绑定事件
 		 * @param {string} name 事件名
 		 * @param {Function} cb 回调
@@ -516,6 +622,18 @@ const WMPlayer = (function ($) {
 			return this;
 		}
 
+		/**
+		 * 绑定处理函数
+		 * @param name
+		 * @param cb
+		 * @returns {WMPlayer}
+		 */
+		handle (name, cb) {
+			this.handles[name] = cb;
+			return this;
+		}
+
 	}
+
 	return WMPlayer;
 })(jQuery);
