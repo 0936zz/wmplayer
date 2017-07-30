@@ -3,7 +3,7 @@ const WMPlayer = (function ($) {
 		/**
 		 * @callback bindEvent
 		 * @this WMPlayer
-		 * @return {Boolean} 返回false取消播放
+		 * @return {Boolean} 返回false取消自动播放
 		 */
 
 		/**
@@ -24,7 +24,7 @@ const WMPlayer = (function ($) {
 		 * @param {String}  [config.currentListClass]   当前播放列表的class
 		 * @param {String}  [config.currentSongClass]   当前播放歌曲的class
 		 * @param {String}  [config.currentLrcClass]    当前播放歌词的class
-		 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，当绑定progress处理函数后此配置不再起作用
+		 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，只支持width或height，当绑定progress处理函数后此配置不再起作用
 		 * @param {Boolean} [config.autoPlay=true]
 		 * @param {bindEvent} [callback]
 		 */
@@ -93,7 +93,7 @@ const WMPlayer = (function ($) {
 			// 显示歌曲信息
 			this._setInfo(this.config.playList, this.config.playSong);
 			// 绑定事件的回调
-			callback && callback();
+			if (callback && callback.call(this) === false) this.config.autoPlay = false;
 			// 自动播放
 			if (this.config.autoPlay) {
 				this.play();
@@ -228,6 +228,8 @@ const WMPlayer = (function ($) {
 			this._setLrc(list, song);
 			// 进度条归零
 			this.dom.progress.width(0);
+			// 歌词滚动归零
+			this.dom.lrc.scrollTop(0);
 			// 列表添加样式
 			if (list === this.getDisplayList()) {
 				this._setCurrent(song);
@@ -279,6 +281,7 @@ const WMPlayer = (function ($) {
 				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">正在加载歌词...</li>`);
 				$.get(lrc).done((data) => {
 					this.list[list][song].lrc = this._parseLrc(data);
+					this.list[list][song].ajax = false;
 					if (list === this.getCurrentList() && song === this.getCurrentSong()) {
 						outputLrc(info.lrc);
 					}
@@ -329,10 +332,10 @@ const WMPlayer = (function ($) {
 		/**
 		 * 触发事件
 		 * @param {String} name 事件名
-		 * @param {Array}  args 参数
+		 * @param args
 		 * @private
 		 */
-		_trigger (name, args) {
+		_trigger (name, ...args) {
 			return this.callbacks[name] && this.callbacks[name].apply(this, args);
 		}
 
@@ -422,7 +425,8 @@ const WMPlayer = (function ($) {
 		 * @todo 未完成
 		 */
 		changeList (list) {
-			this._trigger('changeList', [list]);
+			let oldList = this.getDisplayList();
+			if (this._trigger('beforeChangeList', oldList, list) === false) return false;
 			// 设置列表活动类
 			this.dom.listTitle.find(`.${this.config.currentListClass}`).removeClass(this.config.currentListClass);
 			this.dom.listTitle.find(`[data-wm-list-title-${list}]`).addClass(this.config.currentListClass);
@@ -445,6 +449,7 @@ const WMPlayer = (function ($) {
 			if (list === this.getCurrentList()) {
 				this._setCurrent(this.getCurrentSong());
 			}
+			this._trigger('changeList', oldList, list);
 		}
 
 		/**

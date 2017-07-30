@@ -14,14 +14,15 @@ let player = new WMPlayer({
 	currentLrcClass: '',
 	tplLeftDelimiter: '${',
 	tplRightDelimiter: '}$',
-	progressCSSPrototype:'width',
-	autoPlay: false
+	progressCSSPrototype: 'width',
+	autoPlay: true
+}, function () {
+	console.log(this);
+	return false;
 });
 
 
 // 添加效果
-
-$('body').append(player.audio);
 $(function () {
 	let wm = $('.wm');
 	let listBtn = wm.find('.wm-list-toggle');
