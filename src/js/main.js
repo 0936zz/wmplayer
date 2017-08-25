@@ -15,10 +15,7 @@ let player = new WMPlayer({
 	tplLeftDelimiter: '${',
 	tplRightDelimiter: '}$',
 	progressCSSPrototype: 'width',
-	autoPlay: true
-}, function () {
-	console.log(this);
-	return false;
+	autoPlay: false
 });
 
 

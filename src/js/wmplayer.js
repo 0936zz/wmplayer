@@ -1,17 +1,17 @@
 const WMPlayer = (function ($) {
 	class WMPlayer {
 		/**
-		 * @callback bindEvent
+		 * @callback bindEventCallback
 		 * @this WMPlayer
 		 * @return {Boolean} 返回false取消自动播放
 		 */
-
 		/**
-		 * @callback progress
+		 * @callback progressHandle
 		 * @this WMPlayer
 		 * @param {jQuery} progress 进度条元素
 		 * @param {number} percent  进度百分比
 		 */
+
 
 		/**
 		 * 构造函数
@@ -24,9 +24,9 @@ const WMPlayer = (function ($) {
 		 * @param {String}  [config.currentListClass]   当前播放列表的class
 		 * @param {String}  [config.currentSongClass]   当前播放歌曲的class
 		 * @param {String}  [config.currentLrcClass]    当前播放歌词的class
-		 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，只支持width或height，当绑定progress处理函数后此配置不再起作用
+		 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，只支持width或height，当绑定[progress处理函数]{@link progressHandle}后此配置不再起作用
 		 * @param {Boolean} [config.autoPlay=true]
-		 * @param {bindEvent} [callback]
+		 * @param {bindEventCallback} [callback]
 		 */
 		constructor (config, callback) {
 			// 默认配置
@@ -58,7 +58,7 @@ const WMPlayer = (function ($) {
 			// 合并配置项
 			this.config = $.extend({}, defaultConfig, config);
 			// 需要获取的dom数组，play-btn会获取data-wm-play-btn
-			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list', 'list-title', 'lrc', 'progress'];
+			let attrArray = ['play-btn', 'next', 'prev', 'mute', 'name', 'singer', 'cover', 'progress', 'list', 'list-title', 'lrc', 'progress', 'progress-played'];
 			this.dom = {
 				container: $(this.config.containerSelector),
 			};
@@ -109,6 +109,7 @@ const WMPlayer = (function ($) {
 			this.dom.playBtn.on('click', () => {
 				this.togglePlay();
 			});
+			// 播放暂停、时间更新
 			this.audio.on('play pause', () => {
 				// 播放或暂停时修改播放按钮的状态
 				let funName = this.isPlaying() ? 'addClass' : 'removeClass';
@@ -122,6 +123,10 @@ const WMPlayer = (function ($) {
 			// 下一首
 			this.dom.next.on('click', () => {
 				this.next();
+			});
+			// 上一首
+			this.dom.prev.on('click', () => {
+				this.prev();
 			});
 			// 封面加载错误
 			this.dom.cover.on('error', () => {
@@ -153,6 +158,12 @@ const WMPlayer = (function ($) {
 				if (index !== -1) {
 					this.play(this._data('displayList'), index);
 				}
+			});
+			// 进度条
+			this.dom.progress.on('click', (event) => {
+				let x = event.offsetX;
+				let width = this.dom.progress.width();
+				this.setPercent(x / width * 100);
 			});
 
 		}
@@ -227,7 +238,7 @@ const WMPlayer = (function ($) {
 			// 更换歌词
 			this._setLrc(list, song);
 			// 进度条归零
-			this.dom.progress.width(0);
+			this.dom.progressPlayed.width(0);
 			// 歌词滚动归零
 			this.dom.lrc.scrollTop(0);
 			// 列表添加样式
@@ -246,12 +257,16 @@ const WMPlayer = (function ($) {
 
 		}
 
+		/**
+		 * 更新进度条
+		 * @private
+		 */
 		_updateProgress () {
 			let percent = this.getPercent();
 			if (this.handles.progress) {
-				this.handles.progress.call(this, this.dom.progress, percent);
+				this.handles.progress.call(this, this.dom.progressPlayed, percent);
 			} else {
-				this.dom.progress.css(this.config.progressCSSPrototype, percent + '%');
+				this.dom.progressPlayed.css(this.config.progressCSSPrototype, percent + '%');
 			}
 
 		}
@@ -340,6 +355,32 @@ const WMPlayer = (function ($) {
 		}
 
 		/**
+		 * 由程序调用时的下一首
+		 * @private
+		 */
+		_autoNext () {
+			let mode = this.getMode();
+			let song = this.getCurrentSong();
+			let num = this.getSongNum();
+			switch (mode) {
+				case 1:
+					if (++song >= num) {
+						song = 0;
+					}
+					break;
+				case 2:
+					break;
+				case 3:
+					// 随机
+					break;
+				case 0:
+				default:
+					break;
+			}
+			this.play(song);
+		}
+
+		/**
 		 * 播放
 		 * @param {number} [list] 列表序号
 		 * @param {number} [song] 歌曲序号
@@ -398,6 +439,34 @@ const WMPlayer = (function ($) {
 			this.play(song);
 		}
 
+		/**
+		 * 上一首（如果当前是第一首就播放最后一首）
+		 */
+		prev () {
+			let song = this.getCurrentSong();
+			let num = this.getSongNum();
+			if (--song <= 0) {
+				song = num - 1;
+			}
+			this.play(song);
+		}
+
+		/**
+		 * 设置播放模式
+		 * @param {number} mode 0->顺序播放 1->列表循环 2->单曲循环 3->随机播放
+		 */
+		setMode (mode) {
+			mode = Math.max(0, Math.min(3, mode));
+			this._data('playMode', mode);
+		}
+
+		/**
+		 * 获取播放模式
+		 * @return {number}
+		 */
+		getMode () {
+			return this._data('playMode');
+		}
 
 		/**
 		 * 切换播放状态
@@ -486,16 +555,48 @@ const WMPlayer = (function ($) {
 			}
 		}
 
+		/**
+		 * 获取当前播放时间（单位：秒）
+		 * @return {number}
+		 */
 		getCurrentTime () {
 			return Math.round(this.audio.prop('currentTime') * 1000);
 		}
 
+		/**
+		 * 设置当前时间
+		 * @param time
+		 * @todo 添加缓存判断
+		 */
+		setCurrentTime (time) {
+			this.audio.prop('currentTime', time / 1000);
+		}
+
+		/**
+		 * 获取歌曲总长（单位：秒）
+		 * @return {number}
+		 */
 		getDuration () {
 			return Math.round(this.audio.prop('duration') * 1000);
 		}
 
+		/**
+		 * 获取当前播放百分比（0-100）
+		 * @return {number}
+		 */
 		getPercent () {
 			return this.getCurrentTime() / this.getDuration() * 100;
+		}
+
+		/**
+		 * 设置播放进度
+		 * @param percent
+		 */
+		setPercent (percent) {
+			let duration = this.getDuration();
+			percent = percent / 100;
+			let time = duration * percent;
+			this.setCurrentTime(time);
 		}
 
 		/**
@@ -523,7 +624,6 @@ const WMPlayer = (function ($) {
 		 * @param {boolean} [info=false]    true返回完整信息，false返回序号
 		 * @returns {object|int}
 		 */
-
 		getCurrentSong (info = false) {
 			if (info) {
 				return this.getInfo();
@@ -541,7 +641,6 @@ const WMPlayer = (function ($) {
 			let info = this.getList(list);
 			return info.length;
 		}
-
 
 		/**
 		 * 获取当前显示的列表

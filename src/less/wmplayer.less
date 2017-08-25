@@ -13,6 +13,7 @@
 	height: 76px;
 	background-color: @wm-color-bg;
 	transition: left .3s;
+	z-index: 1;
 	&.wm-hide {
 		left: -280px + 72px;
 		.wm-toggle-arrow {
@@ -98,6 +99,7 @@
 		right: 0;
 		bottom: 0;
 		height: 4px;
+		cursor: pointer;
 		background: fadeout(@wm-color-text, 70%);
 	}
 	.wm-pro-played {
