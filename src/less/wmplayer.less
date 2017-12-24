@@ -15,7 +15,7 @@
 	transition: left .3s;
 	z-index: 1;
 	&.wm-hide {
-		left: -280px + 72px;
+		left: -280px + 72px + 4px;
 		.wm-toggle-arrow {
 			transform: rotate(0);
 		}
@@ -25,7 +25,7 @@
 			width: 72px + 4px;
 		}
 		.wm-play {
-			top: (76px - @play-height) / 2;
+			top: (76px - @play-width) / 2;
 			left: (76px - @play-height) / 2;
 		}
 	}
@@ -189,7 +189,7 @@
 		display: none;
 		li {
 			cursor: pointer;
-			&:hover,&.wm-list-title-current {
+			&:hover, &.wm-list-title-current {
 				background: fadeout(@wm-color-grey, 30%);
 			}
 		}
@@ -260,6 +260,7 @@
 	.wm-list-cover {
 		width: 56px;
 		height: 56px;
+		display: inline-block;
 	}
 	.wm-list-play {
 		.sprite(@play-sm);

@@ -1,0 +1,3 @@
+WMPlayer.language.zhCN = {
+
+};

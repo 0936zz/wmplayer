@@ -9,6 +9,7 @@ V2版本参见[Git@OSC](https://git.oschina.net/0936zz/WMPlayer)
 ## TODO
 - [ ] 快捷键绑定
 - [ ] 缓冲进度条
+- [ ] 测试
 - [ ] English Document
 
 如何开发

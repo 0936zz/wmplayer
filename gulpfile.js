@@ -13,6 +13,8 @@ const plumber = require('gulp-plumber');
 const opn = require('opn');
 const del = require('del');
 const order = require('gulp-order');
+const fileInclude = require('gulp-file-include');
+const gulpIgnore = require('gulp-ignore');
 
 gulp.task('connect', () => {
 	connect.server({
@@ -36,13 +38,16 @@ gulp.task('liveload', () => {
 });
 
 gulp.task('js', ['lint'], () => {
-	gulp.src('src/js/*.js')
+	gulp.src(['src/js/wrapper.js','src/js/main.js'])
 		.pipe(plumber())
 		.pipe(order([
-			'list.js',
-			'wmplayer.js',
-			'main.js',
+			'wrapper.js',
+			'main.js'
 		]))
+		.pipe(fileInclude({
+			prefix: '// @@',
+			basepath: '@file'
+		}))
 		.pipe(concat('app.js'))
 		// 如果浏览器不支持es6可以将下面的代码取消注释
 		// .pipe(babel({
@@ -91,21 +96,41 @@ gulp.task('sprite', () => {
 		.pipe(connect.reload());
 });
 
-gulp.task('build', () => {
-	gulp.src('src/js/wmplayer.js')
+gulp.task('buildJS', ['lint'], () => {
+	gulp.src('src/js/wrapper.js')
 		.pipe(eslint({
 			configFile: '.eslintrc'
 		}))
 		.pipe(eslint.failOnError())
+		.pipe(gulpIgnore.exclude('src/js/wmplayer.js'))
+		.pipe(fileInclude({
+			prefix: '// @@',
+			basepath: '@file',
+			indent: true
+		}))
 		.pipe(babel({
 			presets: ['es2015']
 		}))
+		.pipe(rename('wmplayer.js'))
 		.pipe(gulp.dest('dist/js/'))
 		.pipe(uglify())
 		.pipe(rename('wmplayer.min.js'))
 		.pipe(gulp.dest('dist/js/'));
+});
 
+gulp.task('buildCSS', () => {
+	gulp.src('src/less/wmplayer.less')
+		.pipe(less())
+		.pipe(autoPrefixer({
+			browsers: ['chrome >= 20', 'ie > 8', 'firefox >= 20', 'android >= 2.3']
+		}))
+		.pipe(gulp.dest('dist/css/'))
+		.pipe(cleanCss({ compatibility: 'ie8' }))
+		.pipe(rename('wmplayer.min.css'))
+		.pipe(gulp.dest('dist/css/'));
+});
 
+gulp.task('buildSprite', () => {
 	let spriteData = gulp.src('src/img/*.png')
 		.pipe(spritesmith({
 			imgName: 'sprite.png',
@@ -116,14 +141,12 @@ gulp.task('build', () => {
 		.pipe(gulp.dest('src/less/'));
 	spriteData.img
 		.pipe(gulp.dest('dist/img/'));
+});
 
-	gulp.src('src/less/wmplayer.less')
-		.pipe(less())
-		.pipe(autoPrefixer({
-			browsers: ['chrome >= 20', 'ie > 8', 'firefox >= 20', 'android >= 2.3']
-		}))
-		.pipe(gulp.dest('dist/css/'))
-		.pipe(cleanCss({compatibility: 'ie8'}))
-		.pipe(rename('wmplayer.min.css'))
-		.pipe(gulp.dest('dist/css/'));
+gulp.task('build', ['buildJS', 'buildCSS', 'buildSprite']);
+
+//TODO
+gulp.task('clean', () => {
+	gulp.src(['dist/*'])
+		.pipe(del());
 });

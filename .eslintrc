@@ -35,6 +35,9 @@
       "error",
       "always"
     ],
+    "no-constant-condition": [
+      "off"
+    ],
     // disable rules from base configurations
     "no-console": 1
   }

@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "gulp-file-include": "^2.0.0",
+    "gulp-ignore": "^2.0.2",
     "jquery": "^3.2.1"
   },
   "devDependencies": {
