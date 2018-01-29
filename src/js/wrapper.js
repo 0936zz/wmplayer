@@ -5,6 +5,5 @@
 		(global.WMPlayer = factory(jQuery));
 })(typeof window !== 'undefined' ? window : this, (function ($) {
 	// @@include('wmplayer.js')
-
 	return WMPlayer;
 }));

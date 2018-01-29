@@ -5,6 +5,12 @@
 @wm-color-primary: #F44336;
 @wm-color-grey: #929292;
 
+.ellipsis {
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .wm {
 	position: fixed;
 	bottom: 80px;
@@ -85,13 +91,18 @@
 	}
 	.wm-song {
 		font-size: 18px;
+		height: 20px;
 		margin-top: 14px;
 		font-weight: bold;
+		max-width: 280px - 80px - 80px - 8px;
+		.ellipsis;
 	}
 	.wm-singer {
-		margin-top: 8px;
+		margin-top: 6px;
 		font-size: 12px;
 		color: @wm-color-grey;
+		max-width: 280px - 80px - 80px - 8px;
+		.ellipsis;
 	}
 	.wm-pro {
 		position: absolute;
@@ -249,13 +260,17 @@
 		top: 12px;
 		left: 72px;
 		font-size: 18px;
+		max-width: 120px;
+		.ellipsis;
 	}
 	.wm-list-singer {
 		color: @wm-color-grey;
 		position: absolute;
+		max-width: 120px;
 		top: 40px;
 		left: 72px;
 		font-size: 14px;
+		.ellipsis;
 	}
 	.wm-list-cover {
 		width: 56px;
@@ -276,7 +291,7 @@
 	position: fixed;
 	left: 0;
 	bottom: 48px;
-	height: 40px;
+	height: 80px;
 	width: 100%;
 	line-height: 40px;
 	font-size: 24px;
@@ -288,7 +303,12 @@
 	user-select: none;
 	cursor: default;
 	li {
-		color: @wm-color-primary;
+		color: #FFFFFF;
+		height: 40px;
+		overflow-x: hidden;
+		&.wm-lrc-current {
+			color: @wm-color-primary;
+		}
 	}
 }
 
@@ -302,7 +322,10 @@
 	.wm-float {
 		bottom: 24px;
 		line-height: 32px;
-		height: 32px;
+		height: 64px;
 		font-size: 20px;
+		li {
+			height: 32px;
+		}
 	}
 }

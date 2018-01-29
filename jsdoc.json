@@ -1,14 +1,17 @@
 {
-  "source": {
-	"include": [
-	  "src/js/wmplayer.js"
-	]
-  },
-  "opts": {
-	"encoding": "utf8",
-	"destination": "./doc/"
-  },
-  "template": {
-	"monospaceLinks": true
-  }
+	"source": {
+		"include": [
+			"src/js/wmplayer.js"
+		]
+	},
+	"opts": {
+		"encoding": "utf8",
+		"destination": "./docs/api",
+		"template": "./node_modules/ink-docstrap/template"
+	},
+	"templates": {
+		"monospaceLinks": true,
+		"systemName": "WMPlayer",
+		"theme": "flatly"
+	}
 }

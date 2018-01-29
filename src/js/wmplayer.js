@@ -24,11 +24,12 @@ class WMPlayer {
 	 */
 
 	/**
-	 * 进度条处理函数
+	 * 进度条处理函数（包括缓冲条和进度条）
 	 * @callback progressHandle
 	 * @this WMPlayer
 	 * @param {jQuery} progress 进度条元素
 	 * @param {number} percent  进度百分比
+	 * @param {String} type     buffer代表缓冲 play代表播放
 	 */
 
 
@@ -37,14 +38,14 @@ class WMPlayer {
 	 * @constructor
 	 * @param {Object}  config
 	 * @param {String}  config.containerSelector WMPlayer的容器选择器，可设置多个
-	 * @param {Object[]} config.songList        歌曲播放列表
+	 * @param {Array}   config.songList         歌曲播放列表
 	 * @param {String}  config.listTpl          列表输出模板，可插入模板变量
 	 * @param {String}  [config.defaultImg]     封面图片加载失败时显示的图片
 	 * @param {String}  [config.defaultText]    模板中未定义时的默认文字
 	 * @param {String}  [config.currentListClass]   当前播放列表的class
-	 * @param {String}  [config.currentSongClass]   当前播放歌曲的class
+	 * @param {String}  [config.currentSongClass]   当前播放歌曲的class，将会添加到具有data-wm-current-song-class属性的元素上
 	 * @param {String}  [config.currentLrcClass]    当前播放歌词的class
-	 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，只支持width或height，当绑定[progress处理函数]{@link progressHandle}后此配置不再起作用
+	 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，只支持width或height，当绑定{@link progressHandle}后此配置不再起作用
 	 * @param {Boolean} [config.autoPlay=true]  是否自动播放
 	 * @param {String}  [config.language=zh-CN] @TODO 语言
 	 * @param {String}  [config.textWhenLoadingLrc=loading...]  加载歌词时显示的提示文字
@@ -158,7 +159,8 @@ class WMPlayer {
 			if (img !== defaultImg) {
 				this.dom.cover.attr('src', defaultImg);
 			} else {
-				let canvas = document.createElement('canvas');
+				// 默认图片加载出错
+				/*let canvas = document.createElement('canvas');
 				let ctx = canvas.getContext('2d');
 				canvas.width = 500;
 				canvas.height = 500;
@@ -173,7 +175,7 @@ class WMPlayer {
 				ctx.fillStyle = '#000';
 				ctx.fillText('加载封面错误', 250, 250, 500);
 				ctx.fill();
-				this.dom.cover.attr('src', canvas.toDataURL());
+				this.dom.cover.attr('src', canvas.toDataURL());*/
 			}
 
 		});
@@ -268,11 +270,11 @@ class WMPlayer {
 			'currentSong': song
 		});
 		// 输出歌名和歌手
-		this.dom.name.html(songInfo.name);
-		this.dom.singer.html(songInfo.singer);
-		// 包含ajax更换封面
+		this.dom.name.html(songInfo.name).attr('title', songInfo.name);
+		this.dom.singer.html(songInfo.singer).attr('title', songInfo.singer);
+		// 更换封面
 		this.dom.cover.attr('src', songInfo.img);
-		// 更换歌词
+		// 更换歌词(包含ajax)
 		this._setLrc(list, song);
 		// 进度条归零
 		this.dom.progressPlayed.width(0);
@@ -288,10 +290,10 @@ class WMPlayer {
 	 * 给当前播放的歌曲添加class
 	 * @param index
 	 * @private
-	 * @todo 未写
 	 */
 	_setCurrent (index) {
-
+		this.dom.list.find('.' + this.config.currentSongClass).removeClass(this.config.currentSongClass);
+		this.dom.list.find('[data-wm-current-song-class]').eq(index).addClass(this.config.currentSongClass);
 	}
 
 	/**
@@ -301,11 +303,10 @@ class WMPlayer {
 	_updateProgress () {
 		let percent = this.getPercent();
 		if (this.handles.progress) {
-			this.handles.progress.call(this, this.dom.progressPlayed, percent);
+			this.handles.progress.call(this, this.dom.progressPlayed, percent, 'play');
 		} else {
 			this.dom.progressPlayed.css(this.config.progressCSSPrototype, percent + '%');
 		}
-
 	}
 
 	/**
@@ -322,7 +323,13 @@ class WMPlayer {
 			let html = '';
 			let timeArr = [];
 			$.each(lrc, (key, value) => {
-				html += `<li data-wm-lrc-${key}>${value}</li>`;
+				if (value instanceof Array) {
+					for (let i = 0; i < value.length; i++) {
+						html += `<li data-wm-lrc-${key}>${value[i]}</li>`;
+					}
+				} else {
+					html += `<li data-wm-lrc-${key}>${value}</li>`;
+				}
 				timeArr.push(key);
 			});
 			this._data('timeArr', timeArr);
@@ -331,6 +338,7 @@ class WMPlayer {
 		};
 		if (ajax) {
 			this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">正在加载歌词...</li>`);
+			this.list[list][song].lrc = '';
 			$.get(lrc).done((data) => {
 				this.list[list][song].lrc = this._parseLrc(data);
 				this.list[list][song].ajax = false;
@@ -457,7 +465,7 @@ class WMPlayer {
 	}
 
 	/**
-	 * 暂停播放
+	 * 暂停
 	 */
 	pause () {
 		this.audio.get(0).pause();
@@ -488,7 +496,7 @@ class WMPlayer {
 	prev () {
 		let song = this.getCurrentSong();
 		let num = this.getSongNum();
-		if (--song <= 0) {
+		if (--song < 0) {
 			song = num - 1;
 		}
 		this.play(song);
@@ -713,15 +721,11 @@ class WMPlayer {
 	 */
 	getLrc (time = this.getCurrentTime(), info = true) {
 		let lrcList = this.getCurrentSong(true).lrc;
-		let lrc, lastIndex = 0;
-		$.each(lrcList, function (index) {
-			if (time < index) {
-				return false;
-			}
-			lastIndex = index;
+		let indexArray = Object.keys(lrcList).map(v => parseInt(v)).sort((a, b) => (b - a));
+		let lrcIndex = indexArray.findIndex(index => {
+			return time >= index;
 		});
-		lrc = lastIndex;
-		return info ? this.getCurrentSong(true).lrc[lrc] : lrc;
+		return info ? this.getCurrentSong(true).lrc[indexArray[lrcIndex]] : indexArray[lrcIndex];
 	}
 
 	/**
@@ -730,13 +734,15 @@ class WMPlayer {
 	updateLrc () {
 		let dataLrc = this._data('currentLrc');
 		let currentLrc = this.getLrc(this.getCurrentTime(), false);
-		// 判断是否需要切换歌词
-		if (dataLrc !== currentLrc) {
+		if (typeof currentLrc === 'undefined') {
+			this.dom.lrc.scrollTop(0);
+		} else if (dataLrc !== currentLrc) {
+			// 判断是否需要切换歌词
 			// 设置当前歌词
 			this._data('currentLrc', currentLrc);
 			// 删除以前添加的class
 			let currentClass = this.config.currentLrcClass;
-			this.dom.lrc.find(currentClass).removeClass(currentClass);
+			this.dom.lrc.find('.' + currentClass).removeClass(currentClass);
 			this.dom.lrc.each(function (index, ele) {
 				ele = $(ele);
 				let lrc = ele.find(`[data-wm-lrc-${currentLrc}]`);
@@ -787,4 +793,3 @@ class WMPlayer {
 
 	}
 }
-

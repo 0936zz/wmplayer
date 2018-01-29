@@ -16,8 +16,7 @@ V2版本参见[Git@OSC](https://git.oschina.net/0936zz/WMPlayer)
 ```bash
 git clone https://github.com/0936zz/wmplayer.git
 cd wmplayer
-npm install -g gulp
-npm install -g bower
+npm install -g gulp bower
 npm install
 bower install
 npm run dev
@@ -31,6 +30,7 @@ npm run build
 
 如何构建文档
 ```bash
-npm install -g jsdoc
+# 项目根目录
+npm install -g jsdoc documentation
 npm run doc
 ```

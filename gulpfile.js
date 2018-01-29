@@ -38,7 +38,7 @@ gulp.task('liveload', () => {
 });
 
 gulp.task('js', ['lint'], () => {
-	gulp.src(['src/js/wrapper.js','src/js/main.js'])
+	gulp.src(['src/js/wrapper.js', 'src/js/main.js'])
 		.pipe(plumber())
 		.pipe(order([
 			'wrapper.js',

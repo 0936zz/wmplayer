@@ -1,9 +1,48 @@
 [
-  [
-    {
-      "basic": true,
-      "name": "动漫",
-      "img": ""
-    }
-  ]
+	[
+		{
+			"basic": true,
+			"name": "动漫"
+		},
+		{
+			"name": "secret base ~君がくれたもの~ (10 years after Ver.)",
+			"singer": "茅野愛衣/戸松遥/早見沙織",
+			"src": "http://fs.pc.kugou.com/201801281416/6a23414515a873b5586c709fe5f62664/G012/M05/0E/04/TA0DAFUHca-Afk1DAFYYaiaECms593.mp3",
+			"img": "http://imge.kugou.com/stdmusic/20130905/20130905151032334355.jpg",
+			"lrc": "/resource/lrc/secretbase.lrc",
+			"ajax": true
+		},
+		{
+			"name": "Only My Railgun",
+			"singer": "fripSide",
+			"src": "http://fs.pc.kugou.com/201801281456/443952ad93f950c8c0a6f8094ba628eb/G012/M06/0A/04/TA0DAFULdzuAQT5xAD7H1p1vchc426.mp3",
+			"img": "http://imge.kugou.com/stdmusic/20160907/20160907173035683693.jpg",
+			"lrc": "/resource/lrc/onlymyrailgun.lrc",
+			"ajax": true
+		},
+		{
+			"name": "だんご大家族",
+			"singer": "茶太",
+			"src": "http://fs.pc.kugou.com/201801281530/3383df73bd8186f03f345c140db9138f/G002/M09/16/01/ooYBAFS3WQKAOHeKAED9dyWJ8js520.mp3",
+			"img": "http://imge.kugou.com/stdmusic/20150718/20150718203516801862.jpg",
+			"lrc": "/resource/lrc/dangodaikazoku.lrc",
+			"ajax": true
+		},
+		{
+			"name": "INSIDE IDENTITY",
+			"singer": "Black Raison d'être",
+			"src": "http://fs.pc.kugou.com/201801281534/931064ef27dc0052e1a9cbbdc9368708/G011/M01/12/11/q4YBAFULeQCAe7bLAD_75SKJ0IA528.mp3",
+			"img": "http://imge.kugou.com/stdmusic/20150720/20150720112451984406.jpg",
+			"lrc": "/resource/lrc/insideidentity.lrc",
+			"ajax": true
+		},
+		{
+			"name": "打ち上げ花火",
+			"singer": "米津玄師/DAOKO",
+			"src": "http://fs.pc.kugou.com/201801281635/3ea55d5c054aee6f0b4944057091b0e9/G104/M01/17/1B/CIcBAFmLzeSAAB-rAEao83fQS8o163.mp3",
+			"img": "http://imge.kugou.com/stdmusic/20170810/20170810111013866169.jpg",
+			"lrc": "/resource/lrc/uchiagehanabi.lrc",
+			"ajax": true
+		}
+	]
 ]
