@@ -47,8 +47,6 @@ class WMPlayer {
 	 * @param {String}  [config.currentLrcClass]    当前播放歌词的class
 	 * @param {String}  [config.progressCSSPrototype] 修改进度条的CSS属性，只支持width或height，当绑定{@link progressHandle}后此配置不再起作用
 	 * @param {Boolean} [config.autoPlay=true]  是否自动播放
-	 * @param {String}  [config.language=zh-CN] @TODO 语言
-	 * @param {String}  [config.textWhenLoadingLrc=loading...]  加载歌词时显示的提示文字
 	 * @param {afterInit} [callback]    程序初始化结束后用于绑定事件和处理函数的回调
 	 */
 	constructor (config, callback) {
@@ -159,23 +157,7 @@ class WMPlayer {
 			if (img !== defaultImg) {
 				this.dom.cover.attr('src', defaultImg);
 			} else {
-				// 默认图片加载出错
-				/*let canvas = document.createElement('canvas');
-				let ctx = canvas.getContext('2d');
-				canvas.width = 500;
-				canvas.height = 500;
-				ctx.beginPath();
-				ctx.rect(0, 0, 500, 500);
-				ctx.fillStyle = '#FFF';
-				ctx.fill();
-				ctx.beginPath();
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.font = '100px serif';
-				ctx.fillStyle = '#000';
-				ctx.fillText('加载封面错误', 250, 250, 500);
-				ctx.fill();
-				this.dom.cover.attr('src', canvas.toDataURL());*/
+				// TODO 默认图片加载出错callback
 			}
 
 		});
@@ -337,7 +319,7 @@ class WMPlayer {
 			this.updateLrc();
 		};
 		if (ajax) {
-			this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">正在加载歌词...</li>`);
+			this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">${WMPlayer.language.loadingLrc}</li>`);
 			this.list[list][song].lrc = '';
 			$.get(lrc).done((data) => {
 				this.list[list][song].lrc = this._parseLrc(data);
@@ -346,7 +328,7 @@ class WMPlayer {
 					outputLrc(info.lrc);
 				}
 			}).fail(() => {
-				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">歌词加载失败</li>`);
+				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">${WMPlayer.language.loadLrcError}</li>`);
 			});
 		} else {
 			outputLrc(lrc);
@@ -721,7 +703,9 @@ class WMPlayer {
 	 */
 	getLrc (time = this.getCurrentTime(), info = true) {
 		let lrcList = this.getCurrentSong(true).lrc;
+		// 降序排序时间数组
 		let indexArray = Object.keys(lrcList).map(v => parseInt(v)).sort((a, b) => (b - a));
+		// 寻找匹配时间
 		let lrcIndex = indexArray.findIndex(index => {
 			return time >= index;
 		});
@@ -735,6 +719,7 @@ class WMPlayer {
 		let dataLrc = this._data('currentLrc');
 		let currentLrc = this.getLrc(this.getCurrentTime(), false);
 		if (typeof currentLrc === 'undefined') {
+			// 如果歌词第一句前面有很多空白，这时从歌曲中间跳转到第一句前面时歌词不会变化，需手动处理
 			this.dom.lrc.scrollTop(0);
 		} else if (dataLrc !== currentLrc) {
 			// 判断是否需要切换歌词
@@ -759,7 +744,6 @@ class WMPlayer {
 					scrollTop: top + positionTop - lrcTop
 				}, time);
 			});
-
 		}
 	}
 
@@ -783,13 +767,5 @@ class WMPlayer {
 	handle (name, cb) {
 		this.handles[name] = cb;
 		return this;
-	}
-
-	/**
-	 * 切换语言
-	 * @param language 语言代码
-	 */
-	changeLanguage (language) {
-
 	}
 }

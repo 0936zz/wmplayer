@@ -19,7 +19,7 @@ const gulpIgnore = require('gulp-ignore');
 gulp.task('connect', () => {
 	connect.server({
 		name: 'dev',
-		root: ['demo', 'bower_components'],
+		root: ['demo', 'bower_components', 'locales'],
 		port: 8080,
 		livereload: true,
 	});
