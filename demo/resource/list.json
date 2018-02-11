@@ -35,6 +35,12 @@
 			"img": "http://imge.kugou.com/stdmusic/20150720/20150720112451984406.jpg",
 			"lrc": "/resource/lrc/insideidentity.lrc",
 			"ajax": true
+		}
+	],
+	[
+		{
+			"basic": true,
+			"name": "test"
 		},
 		{
 			"name": "打ち上げ花火",

@@ -1,9 +1,10 @@
 # WMPlayer
 
-这是V3版本开发的最新进展，距离开发完毕还剩3650天，请耐心等待
-V2版本参见[Git@OSC](https://git.oschina.net/0936zz/WMPlayer)
+这是V3版本开发的最新进展，~~距离开发完毕还剩3650天，~~请耐心等待
+V2版本参见[Gitee](https://gitee.com/zz5840/WMPlayer)
+还未完成的[使用文档](http://zz5840.github.io/wmplayer)
 
-## 未完成
+## 开发中
 - [ ] 播放模式
 
 ## TODO
@@ -30,7 +31,7 @@ npm run build
 
 如何构建文档
 ```bash
-# 项目根目录
 npm install -g jsdoc documentation
+# 项目根目录
 npm run doc
 ```

@@ -24,7 +24,8 @@ class WMPlayer {
 	 */
 
 	/**
-	 * 进度条处理函数（包括缓冲条和进度条）
+	 * 进度条样式处理函数（包括缓冲条和进度条），用于主题中由canvas或者其他复杂的进度条处理<br>
+	 * 设置此处理函数后将不会自动更新进度条
 	 * @callback progressHandle
 	 * @this WMPlayer
 	 * @param {jQuery} progress 进度条元素
@@ -32,6 +33,16 @@ class WMPlayer {
 	 * @param {String} type     buffer代表缓冲 play代表播放
 	 */
 
+	/**
+	 * 歌曲播放地址处理函数，用于处理某些歌曲的根据事件变化的播放key<br>
+	 * 如果有这个处理函数那么默认歌曲链接需要处理，不需要处理的歌曲请将needSrcHandle属性设置为false<br>
+	 * 或者可以直接给列表设置，列表中如果有单独设置为true的不受列表影响
+	 * @callback songSrcHandle
+	 * @this WMPlayer
+	 * @param {Object} 歌曲原地址
+	 * @param {Object} 歌曲对象
+	 * @return 歌曲实际播放地址
+	 */
 
 	/**
 	 * 构造函数
@@ -84,7 +95,7 @@ class WMPlayer {
 			container: $(this.config.containerSelector),
 		};
 		for (let i = 0; i < attrArray.length; i++) {
-			// 横杆转驼峰
+			// 减号转驼峰
 			let domName = attrArray[i].replace(/-(\w)/g, ($0, $1) => {
 				return $1.toUpperCase();
 			});
@@ -209,16 +220,16 @@ class WMPlayer {
 					return j;
 				}
 			}
-			return 0;
+			return -1;
 		}
 
 		for (let i = 0; i < list.length; i++) {
 			// 添加列表公用数据
 			this.list[i] = [];
 			let basicIndex = getBasic(list[i]);
-			this.list[i].name = list[i][basicIndex].name || this.config.defaultText;
-			this.list[i].singer = list[i][basicIndex].singer || this.config.defaultText;
-			this.list[i].img = list[i][basicIndex].img || this.config.defaultImg;
+			this.list[i].name = list[i][basicIndex].name || this.language.templateDefaultText;
+			this.list[i].singer = list[i][basicIndex].singer || this.language.templateDefaultText;
+			this.list[i].img = list[i][basicIndex].img || '';
 			list[i].splice(basicIndex, 1);
 			// 添加歌曲
 			this.addSong(list[i], i);
@@ -232,7 +243,7 @@ class WMPlayer {
 	_setList () {
 		let html = '';
 		for (let i = 0; i < this.list.length; i++) {
-			html += `<li data-wm-list-title-index="${i}">${this.list[i].name}<li>`;
+			html += `<li data-wm-list-title-index="${i}">${this.list[i].name}</li>`;
 		}
 		this.dom.listTitle.html(html);
 	}
@@ -319,7 +330,7 @@ class WMPlayer {
 			this.updateLrc();
 		};
 		if (ajax) {
-			this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">${WMPlayer.language.loadingLrc}</li>`);
+			this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">${this.language.loadingLrc}</li>`);
 			this.list[list][song].lrc = '';
 			$.get(lrc).done((data) => {
 				this.list[list][song].lrc = this._parseLrc(data);
@@ -328,7 +339,7 @@ class WMPlayer {
 					outputLrc(info.lrc);
 				}
 			}).fail(() => {
-				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">${WMPlayer.language.loadLrcError}</li>`);
+				this.dom.lrc.html(`<li class="${this.config.currentLrcClass}">${this.language.loadLrcError}</li>`);
 			});
 		} else {
 			outputLrc(lrc);
@@ -531,7 +542,7 @@ class WMPlayer {
 		// 设置列表活动类
 		this.dom.listTitle.find(`.${this.config.currentListClass}`).removeClass(this.config.currentListClass);
 		this.dom.listTitle.find(`[data-wm-list-title-${list}]`).addClass(this.config.currentListClass);
-		// 切换audio标签的显示列表
+		// 切换显示列表
 		this._data('displayList', list);
 		// 清除播放列表
 		this.dom.list.empty();
@@ -555,7 +566,7 @@ class WMPlayer {
 
 	/**
 	 * 向列表中添加歌曲
-	 * @param {object|Array} data           歌曲数据，格式同配置中的songList，数组会自动遍历
+	 * @param {object|Array} data           歌曲数据，格式同配置中的songList，如果是数组会自动遍历
 	 * @param {number} [list=当前播放列表]    添加到列表的序号
 	 * @param {number} [index]              添加到的索引，默认为最后一个
 	 */

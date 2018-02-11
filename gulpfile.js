@@ -38,9 +38,10 @@ gulp.task('liveload', () => {
 });
 
 gulp.task('js', ['lint'], () => {
-	gulp.src(['src/js/wrapper.js', 'src/js/main.js'])
+	gulp.src(['src/js/wrapper.js', 'src/js/main.js','src/js/QQMusic.js'])
 		.pipe(plumber())
 		.pipe(order([
+			'QQMusic.js',
 			'wrapper.js',
 			'main.js'
 		]))

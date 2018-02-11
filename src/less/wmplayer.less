@@ -197,7 +197,6 @@
 		overflow: auto;
 		z-index: 1;
 		transition: height .3s;
-		display: none;
 		li {
 			cursor: pointer;
 			&:hover, &.wm-list-title-current {
@@ -252,6 +251,7 @@
 	.wm-list-playing {
 		.wm-list-play {
 			.sprite(@playing);
+			pointer-events: none;
 		}
 	}
 	.wm-list-song {
