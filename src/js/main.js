@@ -25,6 +25,7 @@ $.getJSON('/resource/list.json').done(function (data) {
 
 		});
 	});
+	// console.log(player);
 	// 添加效果
 	$(function () {
 		let wm = $('.wm');

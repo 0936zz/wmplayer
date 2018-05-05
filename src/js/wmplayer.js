@@ -13,8 +13,9 @@ class WMPlayer {
 	 */
 	/**
 	 * 苹果及安卓Chrome由于权限问题无法正常自动播放时会触发此事件
-	 * @callback onAutoPlayError
-	 * @param {Error} error 错误信息
+	 * @callback autoPlayError
+	 * @this WMPlayer
+	 * @param {Error} error 错误对象
 	 */
 	/**
 	 * 每次更换列表前触发
@@ -35,13 +36,13 @@ class WMPlayer {
 
 	/**
 	 * 歌曲播放地址处理函数，用于处理某些歌曲的根据事件变化的播放key<br>
-	 * 如果有这个处理函数那么默认歌曲链接需要处理，不需要处理的歌曲请将needSrcHandle属性设置为false<br>
+	 * 如果有这个处理函数那么默认所有歌曲链接需要处理，如有不需要处理的歌曲请将列表中的`needSrcHandle`属性设置为`false`<br>
 	 * 或者可以直接给列表设置，列表中如果有单独设置为true的不受列表影响
 	 * @callback songSrcHandle
 	 * @this WMPlayer
-	 * @param {Object} 歌曲原地址
-	 * @param {Object} 歌曲对象
-	 * @return 歌曲实际播放地址
+	 * @param {Object} src  歌曲原地址
+	 * @param {Object} song 歌曲对象
+	 * @return {String}     歌曲实际播放地址
 	 */
 
 	/**
@@ -80,8 +81,8 @@ class WMPlayer {
 		 * @private
 		 */
 		function formatDelimiter (str) {
-			// 将( ) [ ] { } ^ $ 加上转义符
-			let reg = new RegExp('(\\{|\\}|\\[|\\]|\\(|\\)|\\^|\\$)', 'g');
+			// TODO 将( ) [ ] { } ^ $ 加上转义符
+			let reg = new RegExp('[()\\[]{}\\^\\$]', 'g');
 			return str.replace(reg, (value) => {
 				return '\\' + value;
 			});
@@ -108,12 +109,12 @@ class WMPlayer {
 		this.data = {};
 		// 匹配歌词和模板的正则表达式
 		this.regex = {
-			lrc: new RegExp('\\[(\\d{2})(&#58;|:)(\\d{2})(&#46;|\\.)(\\d{2})\\]([^\\[]+)', 'g'),
+			lrc: new RegExp('\\[(\\d{2})(&#58;|:)(\\d{2})(&#46;|\\.)(\\d{2})]([^\\[]+)', 'g'),
 			tpl: new RegExp(formatDelimiter(this.config.tplLeftDelimiter) + '(\\w+)' + formatDelimiter(this.config.tplRightDelimiter), 'g')
 		};
 		// 回调函数和处理函数对象
 		this.callbacks = {};
-		this.handles = {};
+		this.handlers = {};
 		// 格式化列表
 		this._formatList();
 		// 输出列表名称
@@ -295,8 +296,8 @@ class WMPlayer {
 	 */
 	_updateProgress () {
 		let percent = this.getPercent();
-		if (this.handles.progress) {
-			this.handles.progress.call(this, this.dom.progressPlayed, percent, 'play');
+		if (this.handlers.progress) {
+			this.handlers.progress.call(this, this.dom.progressPlayed, percent, 'play');
 		} else {
 			this.dom.progressPlayed.css(this.config.progressCSSPrototype, percent + '%');
 		}
@@ -373,8 +374,8 @@ class WMPlayer {
 		let reg = this.regex.lrc;
 		let obj = {};
 		// 匹配歌词
-		let result = null;
 		/*eslint no-cond-assign: off*/
+		let result;
 		while (result = reg.exec(lrc)) {
 			let time = Math.round((parseInt(result[1]) * 60 + parseInt(result[3]) + parseInt(result[5]) / 100) * 1000);
 			let str = $.trim(result[6]) || '&nbsp;';
@@ -775,8 +776,8 @@ class WMPlayer {
 	 * @param cb
 	 * @returns {WMPlayer}
 	 */
-	handle (name, cb) {
-		this.handles[name] = cb;
+	handler (name, cb) {
+		this.handlers[name] = cb;
 		return this;
 	}
 }

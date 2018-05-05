@@ -50,7 +50,7 @@ gulp.task('js', ['lint'], () => {
 			basepath: '@file'
 		}))
 		.pipe(concat('app.js'))
-		// 如果浏览器不支持es6可以将下面的代码取消注释
+		// 如果开发浏览器不支持es6可以将下面的代码取消注释
 		// .pipe(babel({
 		// 	presets: ['es2015'],
 		// }))
@@ -97,7 +97,7 @@ gulp.task('sprite', () => {
 		.pipe(connect.reload());
 });
 
-gulp.task('buildJS', ['lint'], () => {
+gulp.task('build:js', ['lint'], () => {
 	gulp.src('src/js/wrapper.js')
 		.pipe(eslint({
 			configFile: '.eslintrc'
@@ -119,7 +119,7 @@ gulp.task('buildJS', ['lint'], () => {
 		.pipe(gulp.dest('dist/js/'));
 });
 
-gulp.task('buildCSS', () => {
+gulp.task('build:css', () => {
 	gulp.src('src/less/wmplayer.less')
 		.pipe(less())
 		.pipe(autoPrefixer({
@@ -131,7 +131,7 @@ gulp.task('buildCSS', () => {
 		.pipe(gulp.dest('dist/css/'));
 });
 
-gulp.task('buildSprite', () => {
+gulp.task('build:sprite', () => {
 	let spriteData = gulp.src('src/img/*.png')
 		.pipe(spritesmith({
 			imgName: 'sprite.png',
@@ -144,7 +144,7 @@ gulp.task('buildSprite', () => {
 		.pipe(gulp.dest('dist/img/'));
 });
 
-gulp.task('build', ['buildJS', 'buildCSS', 'buildSprite']);
+gulp.task('build', ['build:js', 'build:css', 'build:sprite']);
 
 //TODO
 gulp.task('clean', () => {

@@ -1,13 +1,8 @@
 {
 	"name": "wmplayer",
 	"version": "3.0.0",
-	"description": "",
+	"description": "A customlizable web music player based on HTML5",
 	"main": "index.js",
-	"dependencies": {
-		"gulp-file-include": "^2.0.0",
-		"gulp-ignore": "^2.0.2",
-		"jquery": "^3.2.1"
-	},
 	"devDependencies": {
 		"babel-preset-es2015": "^6.24.1",
 		"del": "^2.2.2",
@@ -19,6 +14,8 @@
 		"gulp-concat": "^2.6.1",
 		"gulp-connect": "^5.0.0",
 		"gulp-eslint": "^3.0.1",
+		"gulp-file-include": "^2.0.0",
+		"gulp-ignore": "^2.0.2",
 		"gulp-less": "^3.3.0",
 		"gulp-order": "^1.1.1",
 		"gulp-plumber": "^1.1.0",
@@ -29,14 +26,17 @@
 		"opn": "^5.0.0"
 	},
 	"scripts": {
-		"dev": "gulp default",
-		"doc": "jsdoc -c jsdoc.json -R README.md & documentation build src/js/wmplayer.js -f md -o docs/api.md",
-		"build": "gulp build"
+		"dev": "./node_modules/.bin/gulp default",
+		"doc": "./node_modules/.bin/jsdoc -c jsdoc.json -R docs/README.md & ./node_modules/.bin/documentation build src/js/wmplayer.js -f md -o docs/api.md",
+		"build": "./node_modules/.bin/gulp build",
+		"build:js": "./node_modules/.bin/gulp build:js",
+		"build:css": "./node_modules/.bin/gulp build:css",
+		"build:sprite": "./node_modules/.bin/gulp build:sprite"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/0936zz/wmplayer"
+		"url": "https://github.com/zz5840/wmplayer"
 	},
-	"author": "0936zz",
+	"author": "zz5840",
 	"license": "MIT"
 }

@@ -6,6 +6,7 @@
 -   [beforePlay](#beforeplay)
 -   [beforeChangeList](#beforechangelist)
 -   [progressHandle](#progresshandle)
+-   [songSrcHandle](#songsrchandle)
 -   [constructor](#constructor)
 -   [play](#play)
 -   [pause](#pause)
@@ -33,7 +34,6 @@
 -   [updateLrc](#updatelrc)
 -   [on](#on)
 -   [handle](#handle)
--   [changeLanguage](#changelanguage)
 -   [onAutoPlayError](#onautoplayerror)
 -   [getBasic](#getbasic)
 
@@ -66,7 +66,8 @@ Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Sta
 
 ## progressHandle
 
-进度条处理函数
+进度条样式处理函数（包括缓冲条和进度条），用于主题中由canvas或者其他复杂的进度条处理<br>
+设置此处理函数后将不会自动更新进度条
 
 Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)
 
@@ -74,6 +75,22 @@ Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Sta
 
 -   `progress` **jQuery** 进度条元素
 -   `percent` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 进度百分比
+-   `type` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** buffer代表缓冲 play代表播放
+
+## songSrcHandle
+
+歌曲播放地址处理函数，用于处理某些歌曲的根据事件变化的播放key<br>
+如果有这个处理函数那么默认歌曲链接需要处理，不需要处理的歌曲请将needSrcHandle属性设置为false<br>
+或者可以直接给列表设置，列表中如果有单独设置为true的不受列表影响
+
+Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)
+
+**Parameters**
+
+-   `src` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)** 歌曲原地址
+-   `song` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)** 歌曲对象
+
+Returns **any** 歌曲实际播放地址
 
 ## constructor
 
@@ -84,16 +101,16 @@ Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Sta
 -   `config` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)** 
     -   `config.containerSelector` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** WMPlayer的容器选择器，可设置多个
     -   `config.songList` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)** 歌曲播放列表
+    -   `config.playList` **[Number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 第一首播放的歌曲所属列表的索引 (optional, default `0`)
+    -   `config.playSong` **[Number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 第一首播放的歌曲在列表中的索引 (optional, default `0`)
+    -   `config.playMode` **[Number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 播放模式，详见[#setMode](#setmode) (optional, default `0`)
     -   `config.listTpl` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 列表输出模板，可插入模板变量
     -   `config.defaultImg` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 封面图片加载失败时显示的图片
-    -   `config.defaultText` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 模板中未定义时的默认文字
     -   `config.currentListClass` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 当前播放列表的class
-    -   `config.currentSongClass` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 当前播放歌曲的class
+    -   `config.currentSongClass` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 当前播放歌曲的class，将会添加到具有data-wm-current-song-class属性的元素上
     -   `config.currentLrcClass` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 当前播放歌词的class
     -   `config.progressCSSPrototype` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 修改进度条的CSS属性，只支持width或height，当绑定[progressHandle](#progresshandle)后此配置不再起作用
     -   `config.autoPlay` **[Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 是否自动播放 (optional, default `true`)
-    -   `config.language` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** @TODO 语言 (optional, default `zh-CN`)
-    -   `config.textWhenLoadingLrc` **[String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 加载歌词时显示的提示文字 (optional, default `loading...`)
 -   `callback` **[afterInit](#afterinit)?** 程序初始化结束后用于绑定事件和处理函数的回调
 
 ## play
@@ -112,7 +129,7 @@ Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Sta
 
 ## pause
 
-暂停播放
+暂停
 
 ## mute
 
@@ -164,7 +181,7 @@ Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 **Parameters**
 
--   `data` **([object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array))** 歌曲数据，格式同配置中的songList，数组会自动遍历
+-   `data` **([object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array))** 歌曲数据，格式同配置中的songList，如果是数组会自动遍历
 -   `list` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 添加到列表的序号 (optional, default `当前播放列表`)
 -   `index` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 添加到的索引，默认为最后一个 (optional, default `this.getSongNum(list)`)
 
@@ -297,14 +314,6 @@ Returns **WMPlayer**
 -   `cb`  
 
 Returns **WMPlayer** 
-
-## changeLanguage
-
-切换语言
-
-**Parameters**
-
--   `language`  语言代码
 
 ## onAutoPlayError
 
